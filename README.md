@@ -1,13 +1,14 @@
-# FC Clean Architecture - Desafio Clean Architecture: API de Listagem de Produtos
+# FC Clean Architecture - Desafio Clean Architecture: Notification Pattern na Entidade Product
 
 Projeto desenvolvido no curso Full Cycle - Clean Architecture.
 
-## Tecnologias
+## Tecnologias e Padrões
 - Node.js & TypeScript
 - Express
 - Sequelize & SQLite in-memory
 - Supertest & Jest
-- jstoxml
+- Yup (Validação)
+- **Notification Pattern** (acumulação de erros de domínio)
 
 ---
 
@@ -24,6 +25,15 @@ Para iniciar o servidor de desenvolvimento:
 npm run dev
 ```
 O servidor inicializará por padrão na porta `3000` (ou na porta configurada via `.env`).
+
+---
+
+## Notification Pattern na Entidade Product
+
+A entidade `Product` foi refatorada para herdar de `Entity` e utilizar o **Notification Pattern**:
+- As regras de validação são processadas via `ProductYupValidator` e instanciadas por `ProductValidatorFactory`.
+- O validador não interrompe o fluxo no primeiro erro encontrado (`abortEarly: false`), acumulando todas as violações na propriedade `notification` com o contexto `product`.
+- Caso haja erros acumulados, um `NotificationError` é lançado consolidando todas as mensagens (ex: `product: Name is required,product: Price must be greater than zero`).
 
 ---
 
