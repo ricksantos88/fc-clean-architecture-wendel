@@ -1,4 +1,4 @@
-# FC Clean Architecture - Desafio Clean Architecture: Notification Pattern na Entidade Product
+# FC Clean Architecture
 
 Projeto desenvolvido no curso Full Cycle - Clean Architecture.
 
@@ -8,7 +8,20 @@ Projeto desenvolvido no curso Full Cycle - Clean Architecture.
 - Sequelize & SQLite in-memory
 - Supertest & Jest
 - Yup (Validação)
-- **Notification Pattern** (acumulação de erros de domínio)
+- **Validator Pattern & Validation Factory** (Validação desacoplada da entidade)
+- **Notification Pattern** (Acumulação e consolidação de erros de domínio)
+
+---
+
+## Validação Desacoplada e Notification Pattern na Entidade Product
+
+A entidade `Product` possui sua validação completamente desacoplada de regras imperativas internas:
+- **`ProductYupValidator`**: Implementa `ValidatorInterface<Product>` utilizando a biblioteca Yup para validar regras de negócio (`id`, `name`, `price`) sem abortar prematuramente (`abortEarly: false`).
+- **`ProductValidatorFactory`**: Factory responsável por instanciar o validador desacoplado (`ProductYupValidator`).
+- **`Product` Entity**:
+  - Herda de `Entity` e delega toda a validação para `ProductValidatorFactory.create().validate(this)`.
+  - Acumula todas as violações na estrutura `this.notification` com o contexto `product`.
+  - Caso existam erros, lança `NotificationError` consolidando as mensagens (ex: `product: Name is required,product: Price must be greater than zero`).
 
 ---
 
@@ -25,15 +38,6 @@ Para iniciar o servidor de desenvolvimento:
 npm run dev
 ```
 O servidor inicializará por padrão na porta `3000` (ou na porta configurada via `.env`).
-
----
-
-## Notification Pattern na Entidade Product
-
-A entidade `Product` foi refatorada para herdar de `Entity` e utilizar o **Notification Pattern**:
-- As regras de validação são processadas via `ProductYupValidator` e instanciadas por `ProductValidatorFactory`.
-- O validador não interrompe o fluxo no primeiro erro encontrado (`abortEarly: false`), acumulando todas as violações na propriedade `notification` com o contexto `product`.
-- Caso haja erros acumulados, um `NotificationError` é lançado consolidando todas as mensagens (ex: `product: Name is required,product: Price must be greater than zero`).
 
 ---
 
